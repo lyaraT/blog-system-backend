@@ -1,4 +1,4 @@
-const {create, getOne, getOneByEmail, getAll, update} = require("../data-access/user.repo");
+const {create, getOne, getAll, update, getOneByEmail} = require("../data-access/user.repo");
 const {hashPassword} = require("../util/hash");
 const {SETTINGS} = require("../config/common.settings");
 const jwt = require("jsonwebtoken");
@@ -8,10 +8,10 @@ const {sendEmailService} = require("./email.service");
 
 
 exports.validateLoginReq = async (password, email) => {
-
     try {
-        const user = await getUserData({email: email});
-        if (!user[0]) {
+        const user = await getUserDataLogin({email: email.email});
+        console.log(user)
+        if (!user) {
             throw {
                 message: "User not found",
             };
@@ -28,15 +28,17 @@ exports.validateLoginReq = async (password, email) => {
                 activateCheck: true,
             };
         }
-        return (await validateUser(password, user[0]));
+        return (await validateUser(password, user));
     } catch (e) {
+        console.log(e)
         throw {message: "Email not found"};
     }
 };
 
 const validateUser = async (password, user) => {
-
     try {
+        console.log(password)
+        console.log(user.password)
         const result = await compare(password, user.password);
         if (!result) {
             throw {message: "Wrong Password"};
@@ -57,32 +59,33 @@ const getTokenData = async (user) => {
 
 exports.registerService = async (data) => {
     try {
-        const emailCheck = await getOneByEmail({email: data.email});
+        const emailCheck = await getUserData({email: data.email});
         if (emailCheck) {
             throw {message: "Email is already existing!", emailCheck: true};
         } else {
-            // const generatedPassword = generatePassword.generate({
-            //     length: 6,
-            //     uppercase: false,
-            // });
-            // console.log(generatedPassword)
-            //
-            // sendEmailService(
-            //     SETTINGS.EMAIL.NEW_USER_PASSWORD_SEND,
-            //     {
-            //         name: data.fullname,
-            //         email: data.email,
-            //         password: generatedPassword,
-            //         url: `http://localhost:3000/auth/login`.toString(),
-            //     },
-            //     data.email,
-            //     `User Credentials`
-            // ).then(()=>{
-            //     console.log('email sent')
-            // });
-            //
-            // data.password = await hashPassword(generatedPassword);
+            if (data.isAuthenticated) {
+                const generatedPassword = generatePassword.generate({
+                    length: 6,
+                    uppercase: false,
+                });
+                console.log(generatedPassword)
 
+                sendEmailService(
+                    SETTINGS.EMAIL.NEW_USER_PASSWORD_SEND,
+                    {
+                        name: data.fullname,
+                        email: data.email,
+                        password: generatedPassword,
+                        url: `http://localhost:3000/auth/login`.toString(),
+                    },
+                    data.email,
+                    `User Credentials`
+                ).then(() => {
+                    console.log('email sent')
+                });
+
+                data.password = await hashPassword(generatedPassword);
+            }
             data.createdAt = new Date();
             return await create(data);
         }
@@ -94,9 +97,20 @@ exports.registerService = async (data) => {
 
 exports.getAllService = async (data) => {
     try {
-        //creating query to get jokes from mySQL Db
-        const query = `SELECT * FROM user`;
-        return await getAll(query);
+        const {pageIndex, pageSize, filters} = data;
+        const {searchValue, status} = filters;
+        // Prepare the WHERE clause based on provided filters
+        let whereClause = 'WHERE isActive = true';
+
+        whereClause += ` AND isAuthenticated = '${status}'`;
+
+        if (searchValue) {
+            whereClause += ` AND fullname LIKE '%${searchValue}%'`;
+        }
+        // Construct the SQL query
+        const query = `SELECT * FROM user ${whereClause}`;
+        console.log(query)
+        return await getAll(query, pageIndex, pageSize);
     } catch (e) {
         throw e;
     }
@@ -104,9 +118,30 @@ exports.getAllService = async (data) => {
 
 exports.updateService = async (data) => {
     try {
+        if (data.isActive !== false) {
+            const generatedPassword = generatePassword.generate({
+                length: 6,
+                uppercase: false,
+            });
+
+            sendEmailService(
+                SETTINGS.EMAIL.NEW_USER_PASSWORD_SEND,
+                {
+                    name: data.fullname,
+                    email: data.email,
+                    password: generatedPassword,
+                    url: `http://localhost:3000/auth/login`.toString(),
+                },
+                data.email,
+                `User Credentials`
+            ).then(() => {
+                console.log('email sent')
+            });
+
+            data.password = await hashPassword(generatedPassword);
+        }
         //creating query to get jokes from mySQL Db
-        const query = `UPDATE user SET fullname = ?, password = ?, role = ?, dob = ?, email = ? WHERE iduser = ?`;
-        return await update(query, data);
+        return await update(data.iduser, data);
     } catch (e) {
         throw e;
     }
@@ -114,7 +149,6 @@ exports.updateService = async (data) => {
 
 exports.getOneService = async (id) => {
     try {
-        console.log(id)
         //creating query to get jokes from mySQL Db
         const query = `SELECT * FROM user WHERE iduser = '${id}'`;
         return await getOne(query);
@@ -123,16 +157,6 @@ exports.getOneService = async (id) => {
         throw e;
     }
 };
-//
-// exports.deleteService = async (data) => {
-//     try{
-//         //creating query to get jokes from mySQL Db
-//         const query = `SELECT * FROM jokes WHERE type = '${data.type}' ORDER BY RAND() LIMIT 1`;
-//         return await getJoke(query);
-//     } catch (e) {
-//         throw e;
-//     }
-// };
 
 
 const generateJWT = async (user) => {
@@ -160,8 +184,9 @@ const generateJWT = async (user) => {
             iat: currentTime.getTime() / 1000 || '',
             exp: Math.floor(expiryTime.getTime() / 1000) || ''
         };
+        const token = await jwt.sign(payload, secretKey);
 
-        return await jwt.sign(payload, secretKey);
+        return {access_token: token, user:payload,}
     } catch (error) {
         console.log(error)
         throw error;
@@ -170,4 +195,9 @@ const generateJWT = async (user) => {
 
 const getUserData = async (data) => {
     return await getOneByEmail(data.email);
+};
+
+const getUserDataLogin = async (data) => {
+    console.log(data)
+    return await getOneByEmail(data);
 };
