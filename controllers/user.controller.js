@@ -15,8 +15,8 @@ exports.registerController = async (req, res) => {
 
 exports.login = async (req, res) => {
     try {
-        const token = await validateLoginReq(req.body.password, req.body.email);
-        res.status(200).send({status:"success", token: token})
+        const token = await validateLoginReq(req.body.password, req.body);
+        res.status(200).send(token)
     } catch (e) {
         res.status(403).send({message:e.message});
     }
@@ -43,9 +43,9 @@ exports.updateController = async (req, res) => {
 
 exports.getAllController = async (req, res) => {
     try {
-        const params = req.query;
-        const joke = await getAllService(params);
-        res.status(200).send(joke);
+        const params = req.body;
+        const user = await getAllService(params);
+        res.status(200).send(user);
     } catch (e) {
         return res.status(403).send(e);
     }
