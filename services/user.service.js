@@ -141,6 +141,7 @@ exports.updateService = async (data) => {
             data.password = await hashPassword(generatedPassword);
         }
         //creating query to get jokes from mySQL Db
+        console.log(data)
         return await update(data.iduser, data);
     } catch (e) {
         throw e;

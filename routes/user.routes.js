@@ -7,7 +7,7 @@ const userRouter = (express.Router());
 userRouter.post("/create", myFunction.registerController);
 userRouter.post("/login", myFunction.login);
 userRouter.post("/paged", myFunction.getAllController);
-userRouter.put("/update", myFunction.getAllController);
+userRouter.post("/update", myFunction.updateController);
 userRouter.get("/get-one/:id", myFunction.getOneController);
 userRouter.delete("/delete/:id", myFunction.deleteController);
 

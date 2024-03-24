@@ -44,15 +44,22 @@ exports.getAll = async (query, page, pageSize) => {
 // Get a random joke from the mySQL db based on the specified joke type
 exports.update = async (id, updatedFields) => {
     try {
-        const { fullname, password, email, role, isActive, dob, isAuthenticated, nic, mobileNo} = updatedFields;
 
-        // Construct the SQL query with placeholders
-        const query = `UPDATE blogs SET fullname = ?,password = ?, email = ?, role = ?, isActive = ?, dob = ?, isAuthenticated = ?, nic = ?, mobileNo = ? WHERE iduser = ?`;
+
+        let { fullname, password, email, role, isActive, dob, isAuthenticated, nic, mobileNo} = updatedFields;
+
+
+         dob = new Date(dob);
+
+         dob = dob.toISOString().split('T')[0];
+
+        const query = `UPDATE user SET fullname = ?,password = ?, email = ?, role = ?, isActive = ?, dob = ?, isAuthenticated = ?, nic = ?, mobileNo = ? WHERE iduser = ?`;
 
         // Execute the query with actual values for the placeholders
         const result = await db.connection.promise().query(query, [fullname, password,email, role, isActive, dob, isAuthenticated, nic, mobileNo,id]);
         return result[0];
     } catch (error) {
+        console.log(error)
         throw error;
     }
 };
