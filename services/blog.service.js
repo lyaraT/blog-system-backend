@@ -1,8 +1,8 @@
-const {create,getAll, getOne, update} = require("../data-access/blog.repo");
+const {create, getAll, getOne, update} = require("../data-access/blog.repo");
 
 
 exports.createService = async (data) => {
-    try{
+    try {
         data.createdAt = new Date();
         return await create(data);
     } catch (e) {
@@ -11,21 +11,26 @@ exports.createService = async (data) => {
 };
 
 exports.getAllService = async (data) => {
-    try{
-
-        const { pageIndex, pageSize, filters } = data;
-        const { searchValue, status } = filters;
+    try {
+        const {pageIndex, pageSize, filters} = data;
+        const {searchValue, status, type} = filters;
+        console.log(status)
         // Prepare the WHERE clause based on provided filters
         let whereClause = 'WHERE isActive = true';
-        if (status) {
-            whereClause += ` AND status = '${status}'`;
+
+        whereClause += ` AND status = '${status}'`;
+
+        if (type !== null) {
+            whereClause += ` AND type = '${type}'`;
         }
+
         if (searchValue) {
             whereClause += ` AND title LIKE '%${searchValue}%'`;
         }
         // Construct the SQL query
         const query = `SELECT * FROM blogs ${whereClause}`;
-        return await getAll(query,pageIndex,pageSize);
+        console.log(query)
+        return await getAll(query, pageIndex, pageSize);
     } catch (e) {
         throw e;
     }
