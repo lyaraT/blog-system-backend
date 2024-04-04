@@ -118,7 +118,7 @@ exports.getAllService = async (data) => {
 
 exports.updateService = async (data) => {
     try {
-        if (data.isActive !== false) {
+        if (data.isActive !== false && data.path !== 'norm') {
             const generatedPassword = generatePassword.generate({
                 length: 6,
                 uppercase: false,
@@ -178,6 +178,9 @@ const generateJWT = async (user) => {
             email: user.email || '',
             role: user.role || '',
             dob: user.dob || '',
+            mobileNo: user.mobileNo || '',
+            aboutMe: user.aboutMe || '',
+            location: user.location || '',
             createdAt: user.createdAt || '',
             isActive: user.isActive || '',
             isAuthenticated: user.isAuthenticated,

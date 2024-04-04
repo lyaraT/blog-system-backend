@@ -36,13 +36,13 @@ exports.getOne = async (query) => {
 
 exports.update = async (id, updatedFields) => {
     try {
-        const { title, subTopic, type, isActive, status, content, imgUrl } = updatedFields;
+        const { title, subTopic, type, isActive, status, content, imgUrl, authorId } = updatedFields;
 
         // Construct the SQL query with placeholders
-        const query = `UPDATE blogs SET title = ?, subTopic = ?, type = ?, isActive = ?, status = ?, content = ?, imgUrl = ? WHERE idblogs = ?`;
+        const query = `UPDATE blogs SET title = ?, subTopic = ?, type = ?, isActive = ?, status = ?, content = ?, imgUrl = ?,authorId = ? WHERE idblogs = ?`;
 
         // Execute the query with actual values for the placeholders
-        const result = await db.connection.promise().query(query, [title, subTopic, type, isActive, status, content, imgUrl, id]);
+        const result = await db.connection.promise().query(query, [title, subTopic, type, isActive, status, content, imgUrl,authorId, id]);
         console.log(result)
         return result[0];
     } catch (error) {

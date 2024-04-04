@@ -51,7 +51,7 @@ exports.getOneService = async (id) => {
 exports.updateService = async (data) => {
     try {
         //creating query to get jokes from mySQL Db
-        const query = `UPDATE user SET title = ?, subTopic = ?, type = ?, isActive = ?, status = ?, content = ?, imgUrl = ? WHERE idblogs = ?`;
+        const query = `UPDATE user SET title = ?, subTopic = ?, type = ?, isActive = ?, status = ?, content = ?, imgUrl = ?, authorId = ? WHERE idblogs = ?`;
         return await update(data.idblogs, data);
     } catch (e) {
         throw e;

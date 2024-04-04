@@ -6,7 +6,7 @@ const upload = multer();
 
 const fileRouter = (express.Router());
 
-fileRouter.post("/upload", upload.single('file'), myFunction.uploadFile);
+fileRouter.post("/upload", myFunction.uploadFile);
 
 
 

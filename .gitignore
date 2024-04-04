@@ -5,7 +5,7 @@
 /tmp
 /out-tsc
 /bazel-out
-config/common.settings.js
+
 
 # Node
 /node_modules

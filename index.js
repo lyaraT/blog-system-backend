@@ -7,6 +7,7 @@ const {initDb} = require("./database/database");
 const blogRouter = require("./routes/blog.routes");
 const fileRouter = require("./routes/file.routes");
 const multer = require("multer");
+const fileUpload = require('express-fileupload')
 
 
 const app = express()
@@ -15,6 +16,7 @@ const app = express()
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(fileUpload())
 
 app.use("/user", userRoutes);
 app.use("/blog", blogRouter);

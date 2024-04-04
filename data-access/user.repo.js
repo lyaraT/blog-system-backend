@@ -6,8 +6,6 @@ exports.create = async (data) => {
 };
 
 
-
-
 exports.getOne = async (query) => {
     let response = await db.connection.promise().query(query);
     return response[0];
@@ -38,31 +36,96 @@ exports.getAll = async (query, page, pageSize) => {
     const totalCount = totalCountRows[0].total;
 
     // Return an object containing both the paginated data and the total count
-    return { data: dataRows, total: totalCount };
+    return {data: dataRows, total: totalCount};
 };
 
 // Get a random joke from the mySQL db based on the specified joke type
 exports.update = async (id, updatedFields) => {
     try {
+        console.log(updatedFields);
 
+        const {
+            fullname,
+            password,
+            email,
+            role,
+            isActive,
+            dob,
+            isAuthenticated,
+            nic,
+            mobileNo,
+            location,
+            aboutMe
+        } = updatedFields;
 
-        let { fullname, password, email, role, isActive, dob, isAuthenticated, nic, mobileNo} = updatedFields;
+        // Construct the SQL query dynamically based on provided fields
+        let query = `UPDATE user SET `;
+        const params = [];
 
+        if (fullname !== undefined) {
+            query += `fullname = ?, `;
+            params.push(fullname);
+        }
+        if (password !== undefined) {
+            query += `password = ?, `;
+            params.push(password);
+        }
+        if (email !== undefined) {
+            query += `email = ?, `;
+            params.push(email);
+        }
+        if (role !== undefined) {
+            query += `role = ?, `;
+            params.push(role);
+        }
+        if (isActive !== undefined) {
+            query += `isActive = ?, `;
+            params.push(isActive);
+        }
+        if (dob !== undefined) {
+            dob = new Date(dob);
+            dob = dob.toISOString().split('T')[0];
+            query += `dob = ?, `;
+            params.push(dob);
+        }
+        if (isAuthenticated !== undefined) {
+            query += `isAuthenticated = ?, `;
+            params.push(isAuthenticated);
+        }
+        if (nic !== undefined) {
+            query += `nic = ?, `;
+            params.push(nic);
+        }
+        if (mobileNo !== undefined) {
+            query += `mobileNo = ?, `;
+            params.push(mobileNo);
+        }
+        if (location !== undefined) {
+            query += `location = ?, `;
+            params.push(location);
+        }
+        if (aboutMe !== undefined) {
+            query += `aboutMe = ?, `;
+            params.push(aboutMe);
+        }
 
-         dob = new Date(dob);
+        // Remove the trailing comma and space from the query string
+        query = query.slice(0, -2);
 
-         dob = dob.toISOString().split('T')[0];
-
-        const query = `UPDATE user SET fullname = ?,password = ?, email = ?, role = ?, isActive = ?, dob = ?, isAuthenticated = ?, nic = ?, mobileNo = ? WHERE iduser = ?`;
+        query += ` WHERE iduser = ?`;
+        params.push(id);
 
         // Execute the query with actual values for the placeholders
-        const result = await db.connection.promise().query(query, [fullname, password,email, role, isActive, dob, isAuthenticated, nic, mobileNo,id]);
+        const result = await db.connection.promise().query(query, params);
+        console.log(result);
+
         return result[0];
     } catch (error) {
-        console.log(error)
+        console.log(error);
         throw error;
     }
 };
+
 
 const query = `UPDATE user SET fullname = ?, email = ?, role = ?, dob = ?, isActive = ?, isAuthenticated = ?, nic = ?, mobileNo = ? WHERE iduser = ?`;
 // exports.delete = async (data) => {

@@ -23,11 +23,12 @@ async function handleImageUpload(req, res) {
         res.end();
         return;
     }
-
+    console.log(req.files.file)
     // Handle POST request for image upload
     if (req.url === '/upload' && req.method === 'POST') {
         try {
-            const file = req.body.get('file'); // Assuming req.body is a FormData object
+            const file = req.files.file // Assuming req.body is a FormData object
+            console.log(file)
             const fileName = `${uuidv1()}.jpg`; // Generate a unique filename
             const filePath = path.join(uploadDirectory, fileName);
 
