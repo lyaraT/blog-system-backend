@@ -2,9 +2,9 @@ exports.SETTINGS = {
     "PORT": 3000,
     "SQL_DB": {
         "HOST": "LocalHost",
-        "USER": "apiit_group_4",
-        "PASSWORD": "apiit_group_4123",
-        "DATABASE": "apiit_group_4"
+        "USER": "root",
+        "PASSWORD": "1234",
+        "DATABASE": "blogsystem"
     },
     "JWT_SECRET": "mySecretKey",
     "BASE_URL": "https://localhost:3000",

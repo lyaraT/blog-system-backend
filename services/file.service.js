@@ -1,35 +1,64 @@
-const http = require('http');
-const { BlobServiceClient } = require('@azure/storage-blob');
-const { v1: uuidv1 } = require('uuid'); // Import uuidv1 to generate unique blob names
-const { SETTINGS } = require("../config/common.settings");
+const fs = require('fs');
+const path = require('path');
+const { v1: uuidv1 } = require('uuid'); // Import uuidv1 to generate unique filenames
 
-const blobServiceClient = new BlobServiceClient(`https://${SETTINGS.AZURE.ACCOUNT_NAME}.blob.core.windows.net/?${SETTINGS.AZURE.SAS_TOKEN}`);
-const containerClient = blobServiceClient.getContainerClient(SETTINGS.AZURE.CONTAINER_NAME);
+// Define the directory where uploaded images will be stored
+const uploadDirectory = path.join(__dirname, '..', 'uploads');
+
+// Create the uploads directory if it doesn't exist
+if (!fs.existsSync(uploadDirectory)) {
+    fs.mkdirSync(uploadDirectory);
+}
 
 async function handleImageUpload(req, res) {
     res.setHeader('Content-Type', 'application/json');
+
+    // Allow preflight OPTIONS requests
+    if (req.method === 'OPTIONS') {
+        res.writeHead(200, {
+            'Access-Control-Allow-Origin': '*', // Allow requests from any origin
+            'Access-Control-Allow-Methods': 'OPTIONS, POST', // Allow OPTIONS and POST methods
+            'Access-Control-Allow-Headers': 'Content-Type', // Allow Content-Type header
+        });
+        res.end();
+        return;
+    }
+
+    // Handle POST request for image upload
     if (req.url === '/upload' && req.method === 'POST') {
         try {
-            console.log(req.body)
             const file = req.body.get('file'); // Assuming req.body is a FormData object
             const fileName = `${uuidv1()}.jpg`; // Generate a unique filename
-            const blobClient = containerClient.getBlockBlobClient(fileName);
+            const filePath = path.join(uploadDirectory, fileName);
 
-            // Upload the file to Azure Blob Storage
-            const response = await blobClient.uploadData(file);
+            // Save the file to the uploads directory
+            await new Promise((resolve, reject) => {
+                const writeStream = fs.createWriteStream(filePath);
+                file.pipe(writeStream);
+                file.on('end', resolve);
+                file.on('error', reject);
+            });
 
-            const imageUrl = blobClient.url;
-            console.log(imageUrl);
+            const imageUrl = `/uploads/${fileName}`;
 
-            res.writeHead(201);
-            res.end(JSON.stringify({ message: 'Image uploaded and metadata stored successfully', imageUrl }));
+            res.writeHead(201, {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*', // Allow requests from any origin
+            });
+            res.end(JSON.stringify({ message: 'Image uploaded successfully', imageUrl }));
         } catch (error) {
             console.error('Error:', error);
-            res.writeHead(500);
+            res.writeHead(500, {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*', // Allow requests from any origin
+            });
             res.end(JSON.stringify({ error: 'Internal Server Error' }));
         }
     } else {
-        res.writeHead(404);
+        res.writeHead(404, {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*', // Allow requests from any origin
+        });
         res.end(JSON.stringify({ error: 'Not Found' }));
     }
 }
