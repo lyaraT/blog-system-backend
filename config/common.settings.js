@@ -1,10 +1,10 @@
 exports.SETTINGS = {
     "PORT": 3000,
     "SQL_DB": {
-        "HOST": "LocalHost",
-        "USER": "root",
-        "PASSWORD": "lyara",
-        "DATABASE": "blogsystem"
+        "HOST": "database-2.ctaecia4mjvj.eu-north-1.rds.amazonaws.com",
+        "USER": "admin",
+        "PASSWORD": "Tehani123!",
+        "DATABASE": "blogDB"
     },
     "JWT_SECRET": "mySecretKey",
     "BASE_URL": "https://localhost:3000",
