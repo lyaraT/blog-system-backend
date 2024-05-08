@@ -3,8 +3,8 @@ exports.SETTINGS = {
     "SQL_DB": {
         "HOST": "Localhost",
         "USER": "root",
-        "PASSWORD": "1234",
-        "DATABASE": "blogsystem123"
+        "PASSWORD": "lyara",
+        "DATABASE": "blogsystem"
     },
     "JWT_SECRET": "mySecretKey",
     "BASE_URL": "https://localhost:3000",
