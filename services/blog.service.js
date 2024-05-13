@@ -6,6 +6,7 @@ exports.createService = async (data) => {
         data.createdAt = new Date();
         return await create(data);
     } catch (e) {
+        console.log(e)
         throw e;
     }
 };

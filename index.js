@@ -6,6 +6,7 @@ const userRoutes = require("./routes/user.routes");
 const {initDb} = require("./database/database");
 const blogRouter = require("./routes/blog.routes");
 const fileRouter = require("./routes/file.routes");
+const responseRouter = require("./routes/response.routes")
 const multer = require("multer");
 const fileUpload = require('express-fileupload')
 
@@ -21,6 +22,7 @@ app.use(fileUpload())
 app.use("/user", userRoutes);
 app.use("/blog", blogRouter);
 app.use("/file", fileRouter);
+app.use("/response", responseRouter);
 
 PORT = 3000 || SETTINGS.PORT;
 

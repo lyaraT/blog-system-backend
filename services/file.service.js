@@ -1,67 +1,60 @@
-const fs = require('fs');
-const path = require('path');
-const { v1: uuidv1 } = require('uuid'); // Import uuidv1 to generate unique filenames
+const { PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
+const _ = require("lodash");
+const { v4: uuidv4 } = require("uuid");
+const { SETTINGS } = require("../config/common.settings");
+const { getExtension } = require("../util/files");
 
-// Define the directory where uploaded images will be stored
-const uploadDirectory = path.join(__dirname, '..', 'uploads');
+const credentials = {
+    accessKeyId: SETTINGS.AWS.accessKeyId,
+    secretAccessKey: SETTINGS.AWS.secretAccessKey,
+};
 
-// Create the uploads directory if it doesn't exist
-if (!fs.existsSync(uploadDirectory)) {
-    fs.mkdirSync(uploadDirectory);
-}
+const s3 = new S3Client({ region: SETTINGS.AWS.region, credentials });
 
-async function handleImageUpload(req, res) {
-    res.setHeader('Content-Type', 'application/json');
+exports.uploadFileService = async (data) => {
 
-    // Allow preflight OPTIONS requests
-    if (req.method === 'OPTIONS') {
-        res.writeHead(200, {
-            'Access-Control-Allow-Origin': '*', // Allow requests from any origin
-            'Access-Control-Allow-Methods': 'OPTIONS, POST', // Allow OPTIONS and POST methods
-            'Access-Control-Allow-Headers': 'Content-Type', // Allow Content-Type header
-        });
-        res.end();
-        return;
+    if (!data || Object.keys(data).length === 0) {
+        throw { message: "No files were uploaded." };
     }
-    console.log(req.files.file)
-    // Handle POST request for image upload
-    if (req.url === '/upload' && req.method === 'POST') {
-        try {
-            const file = req.files.file // Assuming req.body is a FormData object
-            console.log(file)
-            const fileName = `${uuidv1()}.jpg`; // Generate a unique filename
-            const filePath = path.join(uploadDirectory, fileName);
+    const { file, files } = data;
 
-            // Save the file to the uploads directory
-            await new Promise((resolve, reject) => {
-                const writeStream = fs.createWriteStream(filePath);
-                file.pipe(writeStream);
-                file.on('end', resolve);
-                file.on('error', reject);
-            });
-
-            const imageUrl = `/uploads/${fileName}`;
-
-            res.writeHead(201, {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*', // Allow requests from any origin
-            });
-            res.end(JSON.stringify({ message: 'Image uploaded successfully', imageUrl }));
-        } catch (error) {
-            console.error('Error:', error);
-            res.writeHead(500, {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*', // Allow requests from any origin
-            });
-            res.end(JSON.stringify({ error: 'Internal Server Error' }));
+    if (file) {
+        return await upload(file);
+    } else if (files) {
+        const uploadedFilesList = [];
+        if (_.isArray(files)) {
+            for (const singleFile of files) {
+                const data = await upload(singleFile);
+                uploadedFilesList.push(data);
+            }
+        } else {
+            const data = await upload(files);
+            uploadedFilesList.push(data);
         }
-    } else {
-        res.writeHead(404, {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*', // Allow requests from any origin
-        });
-        res.end(JSON.stringify({ error: 'Not Found' }));
+        return uploadedFilesList;
     }
-}
+};
 
-module.exports = { handleImageUpload };
+const upload = async (file) => {
+    const extension = getExtension(file.mimetype);
+    const fileName = `${uuidv4()}${extension}`;
+    const command = new PutObjectCommand({
+        Bucket: SETTINGS.AWS.bucketName,
+        Key: `${SETTINGS.AWS.folder}/${fileName}`, // File name you want to save as in S3
+        Body: file.data,
+        ContentType: file.mimetype,
+        ACL: "public-read",
+    });
+    try {
+        const data = await s3.send(command);
+        return {
+            uid: data.ETag,
+            name: fileName,
+            status: "done",
+            url: `${SETTINGS.AWS.baseUrl}/${SETTINGS.AWS.folder}/${fileName}`,
+        };
+    } catch (e) {
+        console.log(e)
+        throw e;
+    }
+};
