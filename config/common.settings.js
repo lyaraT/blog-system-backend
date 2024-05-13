@@ -23,13 +23,5 @@ exports.SETTINGS = {
         "ACCOUNT_NAME": "blogsystem101",
         "CONTAINER_NAME": "blobby"
     },
-    "AWS": {
-        "accessKeyId": "AKIAQ3EGRBFOTBKAUNTF",
-        "baseUrl": "https://blogsystemapiit.s3.eu-north-1.amazonaws.com",
-        "bucketName": "blogsystemapiit",
-        "folder": "bucket",
-        "hostedZoneName": "",
-        "region": "eu-north-1",
-        "secretAccessKey": "GvjXcwRiOUWrtJIitPRKpF9K7S78Qb+gYwgy2n3B",
-    },
+   
 }
