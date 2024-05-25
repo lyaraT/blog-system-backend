@@ -83,7 +83,6 @@ exports.update = async (id, updatedFields) => {
             params.push(isActive);
         }
         if (dob !== undefined) {
-            dob = new Date(dob);
             dob = dob.toISOString().split('T')[0];
             query += `dob = ?, `;
             params.push(dob);
