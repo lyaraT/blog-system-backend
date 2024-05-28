@@ -82,11 +82,11 @@ exports.update = async (id, updatedFields) => {
             query += `isActive = ?, `;
             params.push(isActive);
         }
-        if (dob !== undefined) {
-            dob = dob.toISOString().split('T')[0];
-            query += `dob = ?, `;
-            params.push(dob);
-        }
+        // if (dob !== undefined) {
+        //     dob = dob.toISOString().split('T')[0];
+        //     query += `dob = ?, `;
+        //     params.push(dob);
+        // }
         if (isAuthenticated !== undefined) {
             query += `isAuthenticated = ?, `;
             params.push(isAuthenticated);
@@ -113,6 +113,9 @@ exports.update = async (id, updatedFields) => {
 
         query += ` WHERE iduser = ?`;
         params.push(id);
+
+
+        
 
         // Execute the query with actual values for the placeholders
         const result = await db.connection.promise().query(query, params);

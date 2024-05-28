@@ -123,6 +123,7 @@ exports.updateService = async (data) => {
                 length: 6,
                 uppercase: false,
             });
+            console.log('sfs')
 
             sendEmailService(
                 SETTINGS.EMAIL.NEW_USER_PASSWORD_SEND,
