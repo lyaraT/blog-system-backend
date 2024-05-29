@@ -1,4 +1,4 @@
-const { createService, getAllService, updateService, getOneService } = require("../services/slot.service");
+const { createService, getAllService, updateService, getOneService, deleteOneService } = require("../services/slot.service");
 
 
 exports.createController = async (req, res) => {
@@ -34,6 +34,17 @@ exports.getOneController = async (req, res) => {
     try {
         const params = req.params.id;
         const user = await getOneService(params);
+        res.status(200).send(user);
+    } catch (e) {
+        return res.status(403).send(e);
+    }
+};
+
+exports.deleteOneController = async (req, res) => {
+    try {
+        const params = req.params.id;
+        console.log(params)
+        const user = await deleteOneService(params);
         res.status(200).send(user);
     } catch (e) {
         return res.status(403).send(e);

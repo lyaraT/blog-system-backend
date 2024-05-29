@@ -4,6 +4,7 @@ const cors = require("cors");
 const http = require('http')
 const userRoutes = require("./routes/user.routes");
 const {initDb} = require("./database/database");
+const slotRouter = require("./routes/slot.routes");
 const blogRouter = require("./routes/blog.routes");
 const fileRouter = require("./routes/file.routes");
 const responseRouter = require("./routes/response.routes")
@@ -23,6 +24,7 @@ app.use("/user", userRoutes);
 app.use("/blog", blogRouter);
 app.use("/file", fileRouter);
 app.use("/response", responseRouter);
+app.use("/slot", slotRouter);
 
 PORT = 3000 || SETTINGS.PORT;
 

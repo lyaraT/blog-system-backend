@@ -1,10 +1,9 @@
 exports.SETTINGS = {
     "PORT": 3000,
     "SQL_DB": {
-        "HOST": "Localhost",
+        "HOST": "LocalHost",
         "USER": "root",
-
-        "PASSWORD": "lyara",
+        "PASSWORD": "admin",
         "DATABASE": "blogsystem"
     },
     "JWT_SECRET": "mySecretKey",

@@ -1,4 +1,4 @@
-const {create, getAll, getOne, update} = require("../data-access/slot.repo");
+const {create, getAll, getOne, update, deleteOne} = require("../data-access/slot.repo");
 
 exports.createService = async (data) => {
     try {
@@ -12,26 +12,21 @@ exports.createService = async (data) => {
 
 exports.getAllService = async (data) => {
     try {
-        const {pageIndex, pageSize, filters} = data;
-        const {searchValue, status, type} = filters;
-        console.log(status)
+     
         // Prepare the WHERE clause based on provided filters
-        let whereClause = 'WHERE isActive = true';
-
-        whereClause += ` AND status = '${status}'`;
-
-        if (type !== null) {
-            whereClause += ` AND type = '${type}'`;
+        let whereClause = `WHERE date = '${data.date}'`;
+    
+        if (data.searchValue) {
+            console.log('dddd')
+            whereClause += ` AND available = 1`;
         }
-
-        if (searchValue) {
-            whereClause += ` AND title LIKE '%${searchValue}%'`;
-        }
+        console.log('sss')
         // Construct the SQL query
-        const query = `SELECT * FROM blogs ${whereClause}`;
+        const query = `SELECT * FROM slots ${whereClause}`;
         console.log(query)
-        return await getAll(query, pageIndex, pageSize);
+        return await getAll(query);
     } catch (e) {
+        console.log(e)
         throw e;
     }
 };
@@ -51,9 +46,22 @@ exports.getOneService = async (id) => {
 exports.updateService = async (data) => {
     try {
         //creating query to get jokes from mySQL Db
-        const query = `UPDATE user SET title = ?, subTopic = ?, type = ?, isActive = ?, status = ?, content = ?, imgUrl = ?, authorId = ? WHERE idblogs = ?`;
-        return await update(data.idblogs, data);
+        const query = `UPDATE slots SET available = ? WHERE id = ?`;
+        console.log('dd')
+        return await update(data.id, data);
     } catch (e) {
+        throw e;
+    }
+};
+
+exports.deleteOneService = async (id) => {
+    try {
+        console.log(id)
+        //creating query to get jokes from mySQL Db
+        const query = `DELETE FROM slots WHERE id = '${id}'`;
+        return await deleteOne(query);
+    } catch (e) {
+        console.log(e)
         throw e;
     }
 };
